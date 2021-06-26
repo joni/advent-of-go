@@ -1,7 +1,6 @@
 package day04
 
 import (
-	"fmt"
 	"io/ioutil"
 	"regexp"
 	"strconv"
@@ -74,7 +73,6 @@ func CountStrictValid(passports string) int {
 	for _, block := range blocks {
 		pport := readPassport(block)
 		if pport.isStrictValid() {
-			fmt.Println(pport)
 			countValid++
 		}
 	}
