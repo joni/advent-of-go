@@ -1,29 +1,35 @@
 package day07
 
 import (
+	"fmt"
 	"io/ioutil"
 	"regexp"
 	"strings"
 )
 
 type rule struct {
-	bag         string
-	contains    []string
-	containedIn []string
+	bag           string
+	contains      []string
+	containsCount map[string]int
+	containedIn   []string
 
 	visited bool
 }
 
 func newRule(ruleStr string) *rule {
-	twoWords := regexp.MustCompile(`(\w+ \w+) bags?`)
-	bags := twoWords.FindAllStringSubmatch(ruleStr, -1)
+	countColor := regexp.MustCompile(`(\d+ \w+ \w+) bags?`)
+	bags := countColor.FindAllStringSubmatch(ruleStr, -1)
 	newRule := new(rule)
-	for i, submatches := range bags {
-		if i == 0 {
-			newRule.bag = submatches[1]
-		} else if submatches[1] != "no other" {
-			newRule.contains = append(newRule.contains, submatches[1])
-		}
+	newRule.containsCount = make(map[string]int)
+	var w1, w2 string
+	fmt.Sscan(ruleStr, &w1, &w2)
+	newRule.bag = w1 + " " + w2
+	for _, submatches := range bags {
+		var bagCount int
+		fmt.Sscan(submatches[1], &bagCount, &w1, &w2)
+		bagColor := w1 + " " + w2
+		newRule.contains = append(newRule.contains, bagColor)
+		newRule.containsCount[bagColor] = bagCount
 	}
 	return newRule
 }
@@ -36,7 +42,7 @@ func fillContainedIn(ruleMap map[string]*rule) {
 	}
 }
 
-func dfs(ruleMap map[string]*rule, start string) int {
+func bfs(ruleMap map[string]*rule, start string) int {
 	queue := []string{start}
 	ruleMap[start].visited = true
 	visitCount := 0
@@ -67,7 +73,7 @@ func solve(rules, bag string) int {
 
 	fillContainedIn(ruleMap)
 
-	return dfs(ruleMap, bag)
+	return bfs(ruleMap, bag)
 }
 
 func Part1() int {
