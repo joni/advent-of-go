@@ -22,11 +22,14 @@ type vm struct {
 	acc int // accumulator
 }
 
-func (vm vm) run(instructions []instruction) int {
+func (vm vm) run(instructions []instruction) (int, bool) {
 	executedLines := make(map[int]bool)
 	for {
+		if vm.pc >= len(instructions) {
+			return vm.acc, true
+		}
 		if _, found := executedLines[vm.pc]; found {
-			return vm.acc
+			return vm.acc, false
 		}
 		executedLines[vm.pc] = true
 		ins := instructions[vm.pc]
@@ -43,14 +46,20 @@ func (vm vm) run(instructions []instruction) int {
 	}
 }
 
-func solve(input string) int {
+func parseInstructions(input string) []instruction {
 	lines := strings.Split(strings.TrimSpace(input), "\n")
-	machine := vm{}
 	instructions := make([]instruction, len(lines))
 	for i, l := range lines {
 		instructions[i] = parseInstruction(l)
 	}
-	return machine.run(instructions)
+	return instructions
+}
+
+func solve(input string) int {
+	instructions := parseInstructions(input)
+	machine := vm{}
+	acc, _ := machine.run(instructions)
+	return acc
 }
 
 func Part1() int {
