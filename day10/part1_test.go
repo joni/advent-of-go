@@ -24,7 +24,7 @@ func TestPart1Example2(t *testing.T) {
 
 func TestPart1(t *testing.T) {
 	actual := Part1()
-	expected := -1
+	expected := 1700
 	if actual != expected {
 		t.Errorf("actual=%v expected=%v", actual, expected)
 	}
