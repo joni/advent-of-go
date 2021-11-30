@@ -5,7 +5,11 @@ import (
 	"strings"
 )
 
-type Cube struct {
+type Cube interface {
+	neighbors() []Cube
+}
+
+type Cube3 struct {
 	x, y, z int
 }
 
@@ -15,7 +19,7 @@ func solve1(input string) int {
 	for row, line := range lines {
 		for col, char := range line {
 			if char == '#' {
-				cubes = append(cubes, Cube{row, col, 0})
+				cubes = append(cubes, Cube3{row, col, 0})
 			}
 		}
 	}
@@ -31,7 +35,7 @@ func nextState(cubes []Cube) []Cube {
 	cubeNeighs := make(map[Cube]int, len(cubes)*20)
 	for _, cube := range cubes {
 		currCubes[cube] = true
-		for _, neigh := range neighbors(cube) {
+		for _, neigh := range cube.neighbors() {
 			cubeNeighs[neigh] += 1
 		}
 	}
@@ -48,13 +52,13 @@ func nextState(cubes []Cube) []Cube {
 	return newState
 }
 
-func neighbors(cube Cube) []Cube {
+func (cube Cube3) neighbors() []Cube {
 	var neighs []Cube
 	for x := -1; x <= 1; x++ {
 		for y := -1; y <= 1; y++ {
 			for z := -1; z <= 1; z++ {
 				if x != 0 || y != 0 || z != 0 {
-					neighs = append(neighs, Cube{cube.x + x, cube.y + y, cube.z + z})
+					neighs = append(neighs, Cube3{cube.x + x, cube.y + y, cube.z + z})
 				}
 			}
 		}
