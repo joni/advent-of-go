@@ -31,12 +31,11 @@ func transpose(content [][]byte) {
 }
 
 func reflect(content [][]byte) {
-	for i := range content {
-		for j := 0; j < N/2; j++ {
-			tmp := content[i][j]
-			content[i][j] = content[i][N-j-1]
-			content[i][N-j-1] = tmp
-		}
+	n := len(content)
+	for i := 0; i < n/2; i++ {
+		tmp := content[i]
+		content[i] = content[n-i-1]
+		content[n-i-1] = tmp
 	}
 }
 
@@ -99,14 +98,18 @@ func makeTile(tileStr string) Tile {
 	return Tile{id, content, false}
 }
 
-func solve1(input string) int {
+func readTiles(input string) []Tile {
 	tileStrs := strings.Split(input, "\n\n")
 	tiles := make([]Tile, 0, len(tileStrs))
 	for _, tileStr := range tileStrs {
 		tiles = append(tiles, makeTile(tileStr))
 	}
+	return tiles
+}
 
-	tilesByCoords := make(map[Point]int)
+func sortTiles(tiles []Tile) (map[Point]Tile, Point, Point) {
+
+	tilesByCoords := make(map[Point]Tile)
 	coords := make(map[int]Point)
 
 	var dfs func(Tile)
@@ -132,33 +135,36 @@ func solve1(input string) int {
 			if _, ok := coords[candidate.id]; !ok {
 				var pt Point
 				if candidate.orient(tile.rightMatchesLeft) {
-					pt = Point{currentPoint.x, currentPoint.y + 1}
-				} else if candidate.orient(tile.leftMatchesRight) {
-					pt = Point{currentPoint.x, currentPoint.y - 1}
-				} else if candidate.orient(tile.topMatchesBottom) {
-					pt = Point{currentPoint.x + 1, currentPoint.y}
-				} else if candidate.orient(tile.bottomMatchesTop) {
 					pt = Point{currentPoint.x - 1, currentPoint.y}
+				} else if candidate.orient(tile.leftMatchesRight) {
+					pt = Point{currentPoint.x + 1, currentPoint.y}
+				} else if candidate.orient(tile.topMatchesBottom) {
+					pt = Point{currentPoint.x, currentPoint.y + 1}
+				} else if candidate.orient(tile.bottomMatchesTop) {
+					pt = Point{currentPoint.x, currentPoint.y - 1}
 				} else {
 					continue
 				}
-				tilesByCoords[pt] = candidate.id
+				tilesByCoords[pt] = candidate
 				coords[candidate.id] = pt
 				dfs(candidate)
 			}
 		}
 	}
 
-	tilesByCoords[Point{}] = tiles[0].id
+	tilesByCoords[Point{}] = tiles[0]
 	coords[tiles[0].id] = Point{0, 0}
 	dfs(tiles[0])
 
-	fmt.Println(coords)
+	return tilesByCoords, topLeft, bottomRight
+}
 
+func solve1(input string) int {
+	tiles := readTiles(input)
+	tilesByCoords, topLeft, bottomRight := sortTiles(tiles)
 	topRight := Point{bottomRight.x, topLeft.y}
 	bottomLeft := Point{topLeft.x, bottomRight.y}
-
-	return tilesByCoords[topLeft] * tilesByCoords[topRight] * tilesByCoords[bottomLeft] * tilesByCoords[bottomRight]
+	return tilesByCoords[topLeft].id * tilesByCoords[topRight].id * tilesByCoords[bottomLeft].id * tilesByCoords[bottomRight].id
 }
 
 func Part1() int {
