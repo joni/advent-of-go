@@ -3,32 +3,32 @@ package day24
 import "io/ioutil"
 
 func step(tiles TileSet) TileSet {
-	newTiles := make(TileSet)
+	newTiles := NewTileSet()
 	count := make(map[Tile]int)
 	for tile := range tiles {
-		for _, neigh := range neighbors(tile) {
+		for _, neigh := range tile.neighbors() {
 			count[neigh]++
 		}
 	}
 	for tile, cnt := range count {
-		if _, ok := tiles[tile]; ok {
+		if tiles.Contains(tile) {
 			// black tile
 			if cnt <= 2 {
 				// keep black
-				newTiles[tile] = struct{}{}
+				newTiles.Add(tile)
 			}
 		} else {
 			// white tile
 			if cnt == 2 {
 				// flip to black
-				newTiles[tile] = struct{}{}
+				newTiles.Add(tile)
 			}
 		}
 	}
 	return newTiles
 }
 
-func neighbors(tile Tile) []Tile {
+func (tile Tile) neighbors() []Tile {
 	return []Tile{
 		{tile.x + 1, tile.y},
 		{tile.x - 1, tile.y},

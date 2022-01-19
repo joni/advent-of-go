@@ -12,9 +12,26 @@ type Tile struct {
 
 type TileSet map[Tile]struct{}
 
+func NewTileSet() TileSet {
+	return make(TileSet)
+}
+
+func (tiles TileSet) Add(tile Tile) {
+	tiles[tile] = struct{}{}
+}
+
+func (tiles TileSet) Contains(tile Tile) bool {
+	_, ok := tiles[tile]
+	return ok
+}
+
+func (tiles TileSet) Remove(tile Tile) {
+	delete(tiles, tile)
+}
+
 func initial(input string) TileSet {
 	scanner := bufio.NewScanner(strings.NewReader(input))
-	tiles := make(TileSet)
+	tiles := NewTileSet()
 	for scanner.Scan() {
 		line := scanner.Text()
 		tile := Tile{}
@@ -48,10 +65,10 @@ func initial(input string) TileSet {
 				}
 			}
 		}
-		if _, ok := tiles[tile]; ok {
-			delete(tiles, tile)
+		if tiles.Contains(tile) {
+			tiles.Remove(tile)
 		} else {
-			tiles[tile] = struct{}{}
+			tiles.Add(tile)
 		}
 	}
 	return tiles
